@@ -54,6 +54,9 @@ div#game{
     overflow: hidden;
     position: relative;
 }
+div#game :focus{
+    outline: 0;
+}
 #words {
     filter: blur(5px);
     color: var(--textSecondary);
@@ -99,15 +102,18 @@ div.word{
         opacity: 1;
     }
 }
+
+
+
+
+
 #cursor{
     width: 3px;
     height: 1.6rem;
     background-color: var(--primaryColor);
     position: fixed;
-    top: 198px;
-    left: 380px;
     animation: blink .9s infinite;
-    display: none;
+
 }
 #game:focus #cursor{
     display: block  ;
