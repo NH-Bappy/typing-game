@@ -56,6 +56,7 @@ game.addEventListener('keyup', ev => {
     // key !== ' ' - Checks that this single character is NOT a space
     const isLetter = key.length === 1 && key !== ' ';
     const isSpace = key === ' ';
+    const isBackspace = key === 'Backspace';
 
 
 
@@ -101,10 +102,22 @@ game.addEventListener('keyup', ev => {
         }
         addClass(currentWord.nextElementSibling?.firstElementChild, 'current')
     }
+
+    //BackSpace
+    if(isBackspace){
+        
+    }
+
+
+
+
+
+
     // move our cursor
     const nextLetter = document.querySelector('.letter.current');
     const nextWord = document.querySelector('.word.current')
     const cursor = document.getElementById('cursor')
+
     cursor.style.top = (nextLetter || nextWord).getBoundingClientRect().top + 2 + 'px';
     cursor.style.left = (nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right'] + 'px';
 

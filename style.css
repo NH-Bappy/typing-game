@@ -91,7 +91,7 @@ div.word{
 }
 
 
-@keyframes blink{
+/* @keyframes blink{
     0%{
         opacity: 1;
     }
@@ -101,11 +101,7 @@ div.word{
     100%{
         opacity: 1;
     }
-}
-
-
-
-
+} */
 
 #cursor{
     width: 3px;
@@ -113,6 +109,7 @@ div.word{
     background-color: var(--primaryColor);
     position: fixed;
     animation: blink .9s infinite;
+    transition: top 0.1s cubic-bezier(0.4, 0, 0.2, 1), left 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 
 }
 #game:focus #cursor{
