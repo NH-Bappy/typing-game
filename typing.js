@@ -57,7 +57,7 @@ game.addEventListener('keyup', ev => {
     const isLetter = key.length === 1 && key !== ' ';
     const isSpace = key === ' ';
     const isBackspace = key === 'Backspace';
-
+    const isFirstLetter = currentLetter === currentWord.firstElementChild;
 
 
     // console.log({ expected });[expected letter]
@@ -104,9 +104,72 @@ game.addEventListener('keyup', ev => {
     }
 
     //BackSpace
-    if(isBackspace){
-        
+    if (isBackspace) {
+        // Case 0: remove extra letters
+        const extraLetter = currentWord.querySelector('.letter.extra:last-of-type');
+        if (extraLetter) {
+            extraLetter.remove();
+
+            // Move cursor to the new last letter
+            const newLastLetter = currentWord.lastElementChild;
+            if (newLastLetter) {
+                // clear previous .current first
+                document.querySelectorAll('.letter.current').forEach(l => removeClass(l, 'current'));
+                addClass(newLastLetter, 'current');
+            }
+
+            //  Recalculate cursor position immediately
+            const nextLetter = document.querySelector('.letter.current');
+            const nextWord = document.querySelector('.word.current');
+            const cursor = document.getElementById('cursor');
+            cursor.style.top = (nextLetter || nextWord).getBoundingClientRect().top + 2 + 'px';
+            cursor.style.left = (nextLetter || nextWord).getBoundingClientRect()[
+                nextLetter ? 'right' : 'right'
+            ] + 'px';
+
+            return; // stop here
+        }
+
+        // Case 1: inside word but not first letter
+        if (currentLetter && !isFirstLetter) {
+            const prev = currentLetter.previousElementSibling;
+            removeClass(currentLetter, 'current');
+            if (prev) {
+                addClass(prev, 'current');
+                removeClass(prev, 'incorrect');
+                removeClass(prev, 'correct');
+            }
+        }
+
+        // Case 2: at first letter of current word → move to previous word
+        else if (currentLetter && isFirstLetter) {
+            const prevWord = currentWord.previousElementSibling;
+            if (prevWord) {
+                removeClass(currentWord, 'current');
+                addClass(prevWord, 'current');
+                removeClass(currentLetter, 'current');
+                const lastLetter = prevWord.lastElementChild;
+                if (lastLetter) {
+                    addClass(lastLetter, 'current');
+                    removeClass(lastLetter, 'incorrect');
+                    removeClass(lastLetter, 'correct');
+                }
+            }
+        }
+
+        // Case 3: no current letter (after space)
+        else if (!currentLetter) {
+            const lastLetter = currentWord.lastElementChild;
+            if (lastLetter) {
+                addClass(lastLetter, 'current');
+                removeClass(lastLetter, 'incorrect');
+                removeClass(lastLetter, 'correct');
+            }
+        }
     }
+
+
+
 
 
 
