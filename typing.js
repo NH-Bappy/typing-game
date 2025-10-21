@@ -1,4 +1,4 @@
-const word = "In a world full of ambiguity and adversity, truly astute individuals remain undaunted by formidable challenges. Their resilience and tenacity allow them to navigate tumultuous circumstances with poise and clarity. They are not complacent or apathetic; rather, they are vigilant, articulate, and meticulous in every endeavor. Their benevolent nature inspires empathy, while their pragmatic mindset ensures efficiency and precision. In moments of turmoil, they avoid impulsive decisions and rely on rational judgment. Such discernment distinguishes them from the capricious or superficial thinkers who often succumb to delusion.Their eloquent speech and coherent reasoning foster camaraderie and credibility among peers.They remain steadfast in purpose, yet adaptable to evolving realities.Even in clandestine conflicts or volatile environments, they uphold integrity and honesty.Their lucid vision turns chaos into clarity, transforming obstacles into opportunities.They treat failure not as a catastrophe, but as a catalyst for innovation.While others grow despondent or melancholic, these resilient souls remain composed, diligent, and altruistic.Their profound insight, sagacious counsel, and audacious spirit make them formidable leaders who inspire reverence rather than fear.Ultimately, it is their humility, fortitude, and perseverance that define their legacy.They transform mediocrity into excellence, chaos into order, and aspiration into achievement.In a society often blinded by materialism and vanity, such virtuous, candid, and magnanimous individuals remind us that true greatness lies not in arrogance, but in authenticity and wisdom.".split(' ');
+const word = "In the ephemeral landscape of modern existence, only the most astute, resilient, and discerning minds can navigate the labyrinthine complexities of life. They confront adversity with equanimity, transforming tribulation into triumph through fortitude and ingenuity. Their eloquence transcends mere speech, reflecting a lucid, articulate, and coherent intellect that commands both admiration and credibility. Unlike the capricious and impetuous, they are meticulous, methodical, and strategic, always maintaining composure amid turmoil. Their tenacity emanates from conviction, not conceit, and their benevolence stems from empathy, not obligation.Such individuals cultivate perspicacity, perceiving subtle nuances where others see only ambiguity.They remain undaunted by formidable opposition, wielding rationality and foresight as their most potent instruments.In moments of chaos, their cogent reasoning and pragmatic judgment restore cohesion and clarity.They possess a magnanimous disposition, blending humility with audacity, caution with courage, and discipline with innovation.Their visionary nature transforms mediocrity into excellence, entropy into order, and aspiration into attainment.Ultimately, their legacy endures not through ostentation or affluence, but through the authenticity of their character and the integrity of their purpose.In an era dominated by pretension, narcissism, and transience, such sagacious, altruistic, and formidable spirits illuminate the path toward genuine wisdom, virtue, and enlightenment".split(' ');
 const game = document.getElementById('game');
 const words = document.getElementById('words')
 const wordCounts = word.length;
@@ -169,7 +169,15 @@ game.addEventListener('keyup', ev => {
     }
 
 
+// move lines to up word / words 
 
+// getBoundingClientRect() is a method that gives you the size and position of an element relative to the viewport
+// (the visible part of the browser window).
+if(currentWord.getBoundingClientRect().top > 250 ){
+    const words = document.getElementById('words');
+    const margin = parseInt(words.style.marginTop || '0px');
+    words.style.marginTop = (margin - 35) + 'px';
+}
 
 
 
