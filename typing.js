@@ -82,6 +82,11 @@ game.addEventListener('keyup', ev => {
             const second = Math.round(mileSecond / 1000);
             const sLeft = (gameTimer / 1000) - second;
             info.innerHTML = sLeft + ''
+            if (sLeft <= 0) {
+                clearInterval(window.timer);
+                window.timer = null;
+                info.innerHTML = 'Time up!';
+            }
         } , 1000);
     }
 
