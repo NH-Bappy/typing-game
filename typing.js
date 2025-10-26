@@ -1,9 +1,13 @@
 const word = "In the ephemeral landscape of modern existence, only the most astute, resilient, and discerning minds can navigate the labyrinthine complexities of life. They confront adversity with equanimity, transforming tribulation into triumph through fortitude and ingenuity. Their eloquence transcends mere speech, reflecting a lucid, articulate, and coherent intellect that commands both admiration and credibility. Unlike the capricious and impetuous, they are meticulous, methodical, and strategic, always maintaining composure amid turmoil. Their tenacity emanates from conviction, not conceit, and their benevolence stems from empathy, not obligation.Such individuals cultivate perspicacity, perceiving subtle nuances where others see only ambiguity.They remain undaunted by formidable opposition, wielding rationality and foresight as their most potent instruments.In moments of chaos, their cogent reasoning and pragmatic judgment restore cohesion and clarity.They possess a magnanimous disposition, blending humility with audacity, caution with courage, and discipline with innovation.Their visionary nature transforms mediocrity into excellence, entropy into order, and aspiration into attainment.Ultimately, their legacy endures not through ostentation or affluence, but through the authenticity of their character and the integrity of their purpose.In an era dominated by pretension, narcissism, and transience, such sagacious, altruistic, and formidable spirits illuminate the path toward genuine wisdom, virtue, and enlightenment".split(' ');
 const game = document.getElementById('game');
 const words = document.getElementById('words')
+const info = document.getElementById('info');
 const wordCounts = word.length;
 const gameTimer = 30 * 1000
 window.timer = null;
+window.gameStart = null;
+
+
 
 function addClass(element, name) {
     element.classList.add(name);
@@ -66,6 +70,18 @@ game.addEventListener('keyup', ev => {
     // console.log({key})[what letter you are typing]
     console.log({ key, expected });
 
+    if (!window.timer && isLetter){
+        window.timer = setInterval(() => {
+            if(!window.gameStart){
+                window.gameStart = (new Date()).getTime();
+            }
+            const currentTime = (new Date()).getTime();
+            const mileSecond = currentTime - window.gameStart;
+            const second = Math.round(mileSecond / 1000);
+            const sLeft = (gameStart / 1000) - second;
+            info.innerHTML = sLeft + ''
+        } , 1000);
+    }
 
     //letter logic
     if (isLetter) {
