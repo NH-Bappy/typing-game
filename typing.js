@@ -70,6 +70,8 @@ game.addEventListener('keyup', ev => {
     // console.log({key})[what letter you are typing]
     console.log({ key, expected });
 
+    // timer logic
+
     if (!window.timer && isLetter){
         window.timer = setInterval(() => {
             if(!window.gameStart){
@@ -78,7 +80,7 @@ game.addEventListener('keyup', ev => {
             const currentTime = (new Date()).getTime();
             const mileSecond = currentTime - window.gameStart;
             const second = Math.round(mileSecond / 1000);
-            const sLeft = (gameStart / 1000) - second;
+            const sLeft = (gameTimer / 1000) - second;
             info.innerHTML = sLeft + ''
         } , 1000);
     }
