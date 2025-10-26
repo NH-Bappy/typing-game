@@ -2,7 +2,8 @@ const word = "In the ephemeral landscape of modern existence, only the most astu
 const game = document.getElementById('game');
 const words = document.getElementById('words')
 const wordCounts = word.length;
-
+const gameTimer = 30 * 1000
+window.timer = null;
 
 function addClass(element, name) {
     element.classList.add(name);
@@ -41,6 +42,7 @@ function newGame() {
     const firstLetter = document.querySelector('.letter');
     addClass(firstWord, 'current');
     addClass(firstLetter, 'current');
+    window.timer = null;
 }
 
 game.addEventListener('keyup', ev => {
@@ -176,7 +178,7 @@ game.addEventListener('keyup', ev => {
 if(currentWord.getBoundingClientRect().top > 250 ){
     const words = document.getElementById('words');
     const margin = parseInt(words.style.marginTop || '0px');
-    words.style.marginTop = (margin - 35) + 'px';
+    words.style.marginTop = (margin - 40) + 'px';
 }
 
 

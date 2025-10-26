@@ -49,12 +49,12 @@ button{
 }
 
 div#game{
-    line-height: 35px;
+    line-height: 40px;
     height: 205px;
     overflow: hidden;
     position: relative;
 }
-div#game :focus{
+div#game:focus{
     outline: 0;
 }
 #words {
