@@ -3,22 +3,18 @@ const game = document.getElementById('game');
 const words = document.getElementById('words')
 const info = document.getElementById('info');
 const wordCounts = word.length;
-const gameTimer = 30 * 1000
-window.timer = null;
-window.gameStart = null;
-
-
+const gameTimer = 30 * 1000;
+let timer = null; // Changed from window.timer to let (better practice)
+let gameStart = null; // Changed from window.gameStart to let (better practice)
+let wpmInterval = null;
 
 function addClass(element, name) {
     element.classList.add(name);
 }
 
 function removeClass(element, name) {
-    if (name && typeof name === 'string') {
-        element.classList.remove(name);
-    }
+    element.classList.remove(name);
 }
-
 
 function randomWord() {
     const randomIndex = Math.floor(Math.random() * wordCounts);
@@ -26,109 +22,190 @@ function randomWord() {
 }
 
 function formatWord(word) {
-    return `<div class = "word">
-        <span class="letter">
-            ${word.split('').join('</span><span class="letter">')} 
-        </span>
-    </div>`
+    return `<div class="word">
+        <span class="letter">${word.split('').join('</span><span class="letter">')}</span>
+    </div>`;
 }
 
+function resetGame() {
+    // Clear any existing intervals
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+    if (wpmInterval) {
+        clearInterval(wpmInterval);
+        wpmInterval = null;
+    }
 
+    gameStart = null;
+    removeClass(game, 'over');
+    words.style.marginTop = '0px';
+}
 
 function newGame() {
+    resetGame();
     words.innerHTML = '';
+
+    // Generate words
     for (let i = 0; i < 200; i++) {
-        words.innerHTML += formatWord(randomWord())
+        words.innerHTML += formatWord(randomWord());
     }
 
     // Select the FIRST word and letter after generating all content
     const firstWord = document.querySelector('.word');
     const firstLetter = document.querySelector('.letter');
-    addClass(firstWord, 'current');
-    addClass(firstLetter, 'current');
-    window.timer = null;
+    if (firstWord && firstLetter) {
+        addClass(firstWord, 'current');
+        addClass(firstLetter, 'current');
+
+        // Position cursor at start
+        const cursor = document.getElementById('cursor');
+        cursor.style.top = firstLetter.getBoundingClientRect().top + 2 + 'px';
+        cursor.style.left = firstLetter.getBoundingClientRect().left + 'px';
+    }
+
+    // Reset timer display
+    info.innerHTML = Math.round(gameTimer / 1000) + '';
+}
+
+function getWpm() {
+    const words = [...document.querySelectorAll('.word')];
+    const lastTypedWord = document.querySelector('.word.current');
+    if (!lastTypedWord) return 0;
+
+    const lastTypedWordIndex = words.indexOf(lastTypedWord) + 1;
+    const typedWords = words.slice(0, lastTypedWordIndex);
+    const correctWords = typedWords.filter(word => {
+        const letters = [...word.children];
+        const incorrectLetters = letters.filter(letter => letter.classList.contains('incorrect'));
+        const correctLetters = letters.filter(letter => letter.classList.contains('correct'));
+        return incorrectLetters.length === 0 && correctLetters.length === letters.length;
+    });
+
+    if (!gameStart) return 0;
+    const timeElapsed = (new Date()).getTime() - gameStart;
+    if (timeElapsed === 0) return 0;
+
+    return Math.round((correctWords.length / timeElapsed) * 60000);
+}
+
+function gameOver() {
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+    if (wpmInterval) {
+        clearInterval(wpmInterval);
+        wpmInterval = null;
+    }
+
+    addClass(game, 'over');
+    const result = getWpm();
+    info.innerHTML = `WPM: ${result}`;
 }
 
 game.addEventListener('keyup', ev => {
-    // console.log(ev)
+    // Prevent default behavior for space key to avoid scrolling
+    if (ev.key === ' ') {
+        ev.preventDefault();
+    }
+
     const key = ev.key;
-    // Finds the current letter:
-    const currentWord = document.querySelector('.word.current')
-    const currentLetter = document.querySelector('.letter.current');
-    // Gets the text content of the current letter element
+    const currentWord = document.querySelector('.word.current');
+
+    // If game is over, don't process input
+    if (game.classList.contains('over')) {
+        return;
+    }
+
+    // If there's no current word, something went wrong - restart game
+    if (!currentWord) {
+        newGame();
+        return;
+    }
+
+    const currentLetter = currentWord.querySelector('.letter.current');
     const expected = currentLetter?.textContent || ' ';
-    // This line of JavaScript code is checking if a variable key represents a single letter character
-    // key.length === 1 - Checks if the key string has exactly 1 character
-    // key !== ' ' - Checks that this single character is NOT a space
     const isLetter = key.length === 1 && key !== ' ';
     const isSpace = key === ' ';
     const isBackspace = key === 'Backspace';
     const isFirstLetter = currentLetter === currentWord.firstElementChild;
 
+    // Start timer on first valid input
+    if (!timer && (isLetter || isSpace)) {
+        gameStart = (new Date()).getTime();
 
-    // console.log({ expected });[expected letter]
-    // console.log({key})[what letter you are typing]
-    console.log({ key, expected });
+        timer = setInterval(() => {
+            if (gameStart) {
+                const currentTime = (new Date()).getTime();
+                const milliseconds = currentTime - gameStart;
+                const seconds = Math.floor(milliseconds / 1000);
+                const sLeft = Math.round(gameTimer / 1000) - seconds;
 
-    // timer logic
+                info.innerHTML = sLeft + '';
 
-    if (!window.timer && isLetter){
-        window.timer = setInterval(() => {
-            if(!window.gameStart){
-                window.gameStart = (new Date()).getTime();
+                if (sLeft <= 0) {
+                    gameOver();
+                }
             }
-            const currentTime = (new Date()).getTime();
-            const mileSecond = currentTime - window.gameStart;
-            const second = Math.round(mileSecond / 1000);
-            const sLeft = (gameTimer / 1000) - second;
-            info.innerHTML = sLeft + ''
-            if (sLeft <= 0) {
-                clearInterval(window.timer);
-                window.timer = null;
-                info.innerHTML = 'Time up!';
-            }
-        } , 1000);
+        }, 1000);
     }
 
-    //letter logic
+    // Letter logic
     if (isLetter) {
         if (currentLetter) {
-            addClass(currentLetter, key.trim() === expected.trim() ? 'correct' : 'incorrect');
+            if (key === expected) {
+                addClass(currentLetter, 'correct');
+                removeClass(currentLetter, 'incorrect');
+            } else {
+                addClass(currentLetter, 'incorrect');
+                removeClass(currentLetter, 'correct');
+            }
             removeClass(currentLetter, 'current');
 
             if (currentLetter.nextElementSibling) {
                 addClass(currentLetter.nextElementSibling, 'current');
             }
-
         } else {
-            //Extra letter (typed after finishing the word)
+            // Extra letter (typed after finishing the word)
             const incorrectLetter = document.createElement('span');
-            incorrectLetter.textContent = key; // show the actual letter typed
+            incorrectLetter.textContent = key;
             incorrectLetter.className = 'letter incorrect extra';
             currentWord.appendChild(incorrectLetter);
         }
     }
 
-    // for space
+    // Space logic
     if (isSpace) {
         if (expected !== ' ') {
-            // “Find all letters in the current word that are not correct yet, and store them in an array.”
-            const letterToInvalidate = [...document.querySelectorAll('.word.current .letter:not(.correct)')];
-            // console.log(letterToInvalidate)
-            // return
-            letterToInvalidate.forEach(letter => {
-                addClass(letter, 'incorrect')
+            // Mark all uncorrected letters as incorrect
+            const lettersToInvalidate = [...currentWord.querySelectorAll('.letter:not(.correct)')];
+            lettersToInvalidate.forEach(letter => {
+                addClass(letter, 'incorrect');
             });
         }
-        removeClass(currentWord, 'current')
-        addClass(currentWord.nextElementSibling, 'current')
-        if (currentLetter) {
-            removeClass(currentLetter, 'current')
+
+        removeClass(currentWord, 'current');
+
+        const nextWord = currentWord.nextElementSibling;
+        if (nextWord) {
+            addClass(nextWord, 'current');
+
+            // Clear current letter from previous word
+            if (currentLetter) {
+                removeClass(currentLetter, 'current');
+            }
+
+            // Set first letter of next word as current
+            const firstLetterOfNextWord = nextWord.querySelector('.letter');
+            if (firstLetterOfNextWord) {
+                addClass(firstLetterOfNextWord, 'current');
+            }
         }
-        addClass(currentWord.nextElementSibling?.firstElementChild, 'current')
     }
 
-    //BackSpace
+    // Backspace logic
     if (isBackspace) {
         // Case 0: remove extra letters
         const extraLetter = currentWord.querySelector('.letter.extra:last-of-type');
@@ -138,21 +215,10 @@ game.addEventListener('keyup', ev => {
             // Move cursor to the new last letter
             const newLastLetter = currentWord.lastElementChild;
             if (newLastLetter) {
-                // clear previous .current first
                 document.querySelectorAll('.letter.current').forEach(l => removeClass(l, 'current'));
                 addClass(newLastLetter, 'current');
             }
-
-            //  Recalculate cursor position immediately
-            const nextLetter = document.querySelector('.letter.current');
-            const nextWord = document.querySelector('.word.current');
-            const cursor = document.getElementById('cursor');
-            cursor.style.top = (nextLetter || nextWord).getBoundingClientRect().top + 2 + 'px';
-            cursor.style.left = (nextLetter || nextWord).getBoundingClientRect()[
-                nextLetter ? 'right' : 'right'
-            ] + 'px';
-
-            return; // stop here
+            return;
         }
 
         // Case 1: inside word but not first letter
@@ -165,7 +231,6 @@ game.addEventListener('keyup', ev => {
                 removeClass(prev, 'correct');
             }
         }
-
         // Case 2: at first letter of current word → move to previous word
         else if (currentLetter && isFirstLetter) {
             const prevWord = currentWord.previousElementSibling;
@@ -173,6 +238,7 @@ game.addEventListener('keyup', ev => {
                 removeClass(currentWord, 'current');
                 addClass(prevWord, 'current');
                 removeClass(currentLetter, 'current');
+
                 const lastLetter = prevWord.lastElementChild;
                 if (lastLetter) {
                     addClass(lastLetter, 'current');
@@ -181,7 +247,6 @@ game.addEventListener('keyup', ev => {
                 }
             }
         }
-
         // Case 3: no current letter (after space)
         else if (!currentLetter) {
             const lastLetter = currentWord.lastElementChild;
@@ -193,59 +258,42 @@ game.addEventListener('keyup', ev => {
         }
     }
 
+    // Scroll logic - move lines up when needed
+    if (currentWord.getBoundingClientRect().top > 250) {
+        const margin = parseInt(words.style.marginTop || '0');
+        words.style.marginTop = (margin - 35) + 'px'; // Reduced from 40 to 35 for smoother scrolling
+    }
 
-// move lines to up word / words 
-
-// getBoundingClientRect() is a method that gives you the size and position of an element relative to the viewport
-// (the visible part of the browser window).
-if(currentWord.getBoundingClientRect().top > 250 ){
-    const words = document.getElementById('words');
-    const margin = parseInt(words.style.marginTop || '0px');
-    words.style.marginTop = (margin - 40) + 'px';
-}
-
-
-
-
-
-
-    // move our cursor
+    // Move cursor
     const nextLetter = document.querySelector('.letter.current');
-    const nextWord = document.querySelector('.word.current')
-    const cursor = document.getElementById('cursor')
+    const nextWord = document.querySelector('.word.current');
+    const cursor = document.getElementById('cursor');
 
-    cursor.style.top = (nextLetter || nextWord).getBoundingClientRect().top + 2 + 'px';
-    cursor.style.left = (nextLetter || nextWord).getBoundingClientRect()[nextLetter ? 'left' : 'right'] + 'px';
+    if (cursor && (nextLetter || nextWord)) {
+        const targetElement = nextLetter || nextWord;
+        const rect = targetElement.getBoundingClientRect();
 
+        cursor.style.top = (rect.top + 2) + 'px';
 
-
-
+        if (nextLetter) {
+            cursor.style.left = rect.left + 'px';
+        } else {
+            cursor.style.left = rect.right + 'px';
+        }
+    }
 });
 
+// Prevent spacebar from scrolling the page
+game.addEventListener('keydown', (ev) => {
+    if (ev.key === ' ') {
+        ev.preventDefault();
+    }
+});
 
+document.getElementById('newGameBtn').addEventListener('click', () => {
+    gameOver();
+    newGame();
+});
 
-
+// Initialize the game
 newGame();
-
-
-
-
-
-
-
-
-
-
-// =======================BackSpace porjonto hoiche==================
-
-
-
-
-
-
-
-
-
-
-
-
